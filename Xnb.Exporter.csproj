@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>Modz2014</Authors>
+    <Company />
+    <Description>Xnb.Exporter is a lightweight library for extracting and exporting assets from XNB files. Ideal for developers using XNA and MonoGame, it supports textures, models, and animations. Simplify your asset management with Xnb.Exporter.</Description>
+    <Title>Xnb.Exporter: Export Textures, Models, and More</Title>
+    <PackageProjectUrl>https://github.com/modz2014/Xnb.Exporter</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Modz2014\Desktop\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
+  </ItemGroup>
+
+</Project>
