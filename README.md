@@ -34,17 +34,3 @@ We welcome feedback, bug reports, and suggestions! If you encounter any issues o
 ## Contact
 If you have any questions or need further assistance, please don’t hesitate to reach out. Enjoy the efficiency of managing your game assets with **XNB Exporter**!
 
-### Key Sections Explained:
-
-- **Update:** Provides a brief guide on how to integrate the tool.
-- **Description:** Gives an overview of the tool and its purpose.
-- **Features:** Lists the key functionalities.
-- **Installation:** Details the steps to set up the tool.
-- **Building the Project:** Instructions for compiling the project.
-- **Usage:** Guides users on how to operate the tool.
-- **Configuration:** Notes on modifying configuration settings.
-- **Feedback and Contributions:** Encourages community involvement.
-- **License:** States the licensing information.
-- **Disclaimer:** Clarifies the project's status and affiliation.
-- **Contact:** Offers a way to get in touch.
-- **Image:** A placeholder for a project image (optional).
