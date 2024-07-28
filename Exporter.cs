@@ -3,18 +3,18 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 
+
 namespace Xnb.Exporter
 {
     public class Exporter
     {
-        public delegate void StatusUpdated(string status);
-        public event StatusUpdated OnStatusUpdate;
+        
         public delegate void Completed();
         public event Completed OnCompleted;
 
         public ContentManager contentManager;
         public GraphicsDevice graphicsDevice;
-        private ListBox listBox;
+
         private readonly PictureBox pictureBox;
         private readonly string[] files;
         public readonly string outPath;
@@ -26,19 +26,24 @@ namespace Xnb.Exporter
         public AnimationClip CurrentAnimation { get; set; }
         public int CurrentFrame { get; set; }
         public string CurrentModelName { get; set; }
-
-
         public string ContentRootDirectory { get; private set; }
+
+        public Exporter(string[] files, PictureBox pictureBox, string outPath = "")
+        {
+            this.files = files;
+            this.pictureBox = pictureBox;
+            this.outPath = outPath;
+            InitializeContentManager();
+        }
+
+
         public void SetContentRootDirectory(string directory)
         {
             try
             {
                 ContentRootDirectory = directory;
                 contentManager.RootDirectory = directory;
-
                 Debug.LogMessage($"Content root directory set to: {directory}");
-
-                
 
             }
             catch (Exception ex)
@@ -47,14 +52,7 @@ namespace Xnb.Exporter
                 MessageBox.Show($"An error occurred while setting content root directory: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        public Exporter(string[] files, ListBox listBox, PictureBox pictureBox, string outPath = "")
-        {
-            this.files = files;
-            this.listBox = listBox;
-            this.pictureBox = pictureBox;
-            this.outPath = outPath;
-            InitializeContentManager();
-        }
+
         public void InitializeContentManager()
         {
             var services = new GameServiceContainer();
@@ -63,7 +61,7 @@ namespace Xnb.Exporter
 
             this.graphicsDevice = graphicsDeviceService.GraphicsDevice;
 
-           
+
 
             string contentRootDirectory = Path.Combine(Application.StartupPath, "content");
             if (!Directory.Exists(contentRootDirectory))
@@ -71,15 +69,14 @@ namespace Xnb.Exporter
                 Directory.CreateDirectory(contentRootDirectory);
             }
             contentManager = new ContentManager(services, contentRootDirectory);
-
         }
 
-        public void Load()
+        public List<XnbItem> Load()
         {
+            List<XnbItem> items = new List<XnbItem>();
+
             try
             {
-                listBox.Items.Clear(); // Clear existing items before adding new ones
-
                 foreach (var file in files)
                 {
                     try
@@ -88,11 +85,12 @@ namespace Xnb.Exporter
                         string relativePath = Path.GetRelativePath(ContentRootDirectory, file);
 
                         // Remove the file extension
-                        string item = Path.ChangeExtension(relativePath, null);
+                        string itemName = Path.ChangeExtension(relativePath, null);
 
-                        listBox.Items.Add(item); // Add item to the list box
+                        // Create a new XnbItem and add it to the list
+                        items.Add(new XnbItem { Name = itemName, Path = file });
 
-                        Debug.LogMessage($"Added item to listBox: {item}");
+                        Debug.LogMessage($"Added item: {itemName}");
                     }
                     catch (ArgumentException ex)
                     {
@@ -106,25 +104,27 @@ namespace Xnb.Exporter
                     }
                 }
 
-                UpdateStatus("\nAll files loaded successfully!");
                 OnCompleted?.Invoke();
             }
             catch (IOException ex)
             {
                 Debug.LogException($"IOException during file loading: {ex.Message}");
-                MessageBox.Show($"An IO error occurred while loading files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Handle the exception as needed
             }
             catch (UnauthorizedAccessException ex)
             {
                 Debug.LogException($"UnauthorizedAccessException during file loading: {ex.Message}");
-                MessageBox.Show($"Unauthorized access error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Handle the exception as needed
             }
             catch (Exception ex)
             {
                 Debug.LogException($"Unexpected error during file loading: {ex.Message}");
-                MessageBox.Show($"An unexpected error occurred while loading files: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Handle the exception as needed
             }
+
+            return items;
         }
+
         public void DisplaySkinnedModel(Model model, string modelName)
         {
             // Assuming you have a valid GraphicsDevice instance available
@@ -149,7 +149,7 @@ namespace Xnb.Exporter
                         // Set the effect used for rendering (if needed)
                         SharpDX.Direct3D9.Effect effect = null;
 
-                       
+
                         mesh.Draw();
                     }
                 }
@@ -160,19 +160,7 @@ namespace Xnb.Exporter
                 MessageBox.Show($"Failed to display skinned model '{modelName}': {ex.Message}", "Rendering Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void UpdateStatus(string message)
-        {
-            if (listBox.InvokeRequired)
-            {
-                listBox.Invoke(new Action(() => listBox.Items.Add(message)));
-            }
-            else
-            {
-                listBox.Items.Add(message);
-            }
 
-            Console.WriteLine(message);
-        }
         public void DisplayFontAtlas(SpriteFont font, string fileName)
         {
             //Displaying the texture of the font
@@ -183,8 +171,70 @@ namespace Xnb.Exporter
                 pictureBox.Image = System.Drawing.Image.FromStream(stream);
             }
 
-            //UpdateStatus($"[SUCCESS] Displayed font atlas (texture) for {fileName}.png");
         }
+
+        public void DisplayImage(Texture2D texture)
+        {
+            try
+            {
+                texture = ConvertToSupportedFormat(texture);
+
+                // Retrieve texture data into an array of Color
+                Microsoft.Xna.Framework.Color[] textureData = new Microsoft.Xna.Framework.Color[texture.Width * texture.Height];
+                texture.GetData(0, null, textureData, 0, texture.Width * texture.Height);
+
+                // Save the texture as PNG to a MemoryStream
+                using (var stream = new MemoryStream())
+                {
+                    // Assuming texture is already converted to supported format
+                    texture.SaveAsPng(stream, texture.Width, texture.Height);
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    // Display the image in pictureBox
+                    pictureBox.Image = System.Drawing.Image.FromStream(stream);
+                }
+
+            }
+            catch (OutOfMemoryException ex)
+            {
+                Debug.LogException(ex.Message); // Log the exception message
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex.Message); // Log the exception message
+            }
+        }
+
+        public void ApplyAnimation(AnimationClip animation)
+        {
+            // Check if there is a current model to apply the animation to
+            if (CurrentModel == null)
+            {
+                Debug.LogMessage("No current model to apply animation to.");
+                return;
+            }
+
+            // Check if the animation data is valid
+            if (animation == null || animation.FrameCount == 0)
+            {
+                Debug.LogMessage("Invalid animation data.");
+                return;
+            }
+
+            // Apply the animation to each bone in the model
+            for (int i = 0; i < CurrentModel.Bones.Count; i++)
+            {
+                // Get the transform from the animation data for this bone
+                Matrix transform = animation.GetTransform(i, CurrentFrame);
+
+                // Apply the transform to the bone
+                CurrentModel.Bones[i].Transform = transform;
+            }
+
+            // Update the current frame (this could be more complex depending on your needs)
+            CurrentFrame = (CurrentFrame + 1) % animation.FrameCount;
+        }
+
         public Texture2D ConvertToSupportedFormat(Texture2D texture)
         {
             // Check if the format is DXT and decompress if needed
@@ -198,10 +248,12 @@ namespace Xnb.Exporter
 
             return texture;
         }
+
         public bool IsDXTFormat(SurfaceFormat format)
         {
             return format == SurfaceFormat.Dxt1 || format == SurfaceFormat.Dxt3 || format == SurfaceFormat.Dxt5;
         }
+
         public Microsoft.Xna.Framework.Color[] DecompressDXT(Texture2D texture)
         {
             int width = texture.Width;
@@ -237,6 +289,7 @@ namespace Xnb.Exporter
                     throw new NotSupportedException("Unsupported texture format");
             }
         }
+
         private Microsoft.Xna.Framework.Color[] ConvertToColorArray(byte[] data, int width, int height)
         {
             var colorData = new Microsoft.Xna.Framework.Color[width * height];
@@ -246,82 +299,7 @@ namespace Xnb.Exporter
             }
             return colorData;
         }
-        public void DisplayImage(Texture2D texture)
-        {
-            try
-            {
-                texture = ConvertToSupportedFormat(texture);
 
-                // Retrieve texture data into an array of Color
-                Microsoft.Xna.Framework.Color[] textureData = new Microsoft.Xna.Framework.Color[texture.Width * texture.Height];
-                texture.GetData(0, null, textureData, 0, texture.Width * texture.Height);
-
-                // Save the texture as PNG to a MemoryStream
-                using (var stream = new MemoryStream())
-                {
-                    // Assuming texture is already converted to supported format
-                    texture.SaveAsPng(stream, texture.Width, texture.Height);
-                    stream.Seek(0, SeekOrigin.Begin);
-
-                    // Display the image in pictureBox
-                    pictureBox.Image = System.Drawing.Image.FromStream(stream);
-                }
-
-                //UpdateStatus($"[SUCCESS] Displayed {texture.Name}.png");
-            }
-            catch (OutOfMemoryException ex)
-            {
-                Debug.LogException(ex.Message); // Log the exception message
-                UpdateStatus($"[ERROR] Out of memory error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex.Message); // Log the exception message
-                UpdateStatus($"[ERROR] Failed to display texture: {ex.Message}");
-            }
-        }
-
-
-        public class AnimationClip
-        {
-            public int FrameCount { get; set; }
-
-            public Matrix GetTransform(int boneIndex, int frameIndex)
-            {
-
-                return Matrix.Identity;
-            }
-        }
-
-        public void ApplyAnimation(AnimationClip animation)
-        {
-            // Check if there is a current model to apply the animation to
-            if (CurrentModel == null)
-            {
-                Debug.LogMessage("No current model to apply animation to.");
-                return;
-            }
-
-            // Check if the animation data is valid
-            if (animation == null || animation.FrameCount == 0)
-            {
-                Debug.LogMessage("Invalid animation data.");
-                return;
-            }
-
-            // Apply the animation to each bone in the model
-            for (int i = 0; i < CurrentModel.Bones.Count; i++)
-            {
-                // Get the transform from the animation data for this bone
-                Matrix transform = animation.GetTransform(i, CurrentFrame);
-
-                // Apply the transform to the bone
-                CurrentModel.Bones[i].Transform = transform;
-            }
-
-            // Update the current frame (this could be more complex depending on your needs)
-            CurrentFrame = (CurrentFrame + 1) % animation.FrameCount;
-        }
         public Bitmap GenerateModelPreview(Model model, GraphicsDevice graphicsDevice, int meshIndex)
         {
             if (graphicsDevice == null)
@@ -397,8 +375,8 @@ namespace Xnb.Exporter
             // Return the Bitmap
             return bitmap;
         }
-    }
 
+    }
 
     public static class Extensions
     {
