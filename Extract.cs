@@ -8,11 +8,25 @@ namespace WindowsApplication1
     {
         private string outPath;
         private Exporter _exporter;
+
+        /**
+        * @brief Initializes a new instance of the Extract class.
+        *
+        * @param exporter An instance of the Exporter class used for converting textures to supported formats.
+        */
         public Extract(Exporter exporter)
         {
             _exporter = exporter;
         }
 
+        /**
+        * @brief Extracts a texture and saves it as a PNG file.
+        *
+        * Converts the texture to a supported format if necessary and prompts the user to specify the file path for saving.
+        *
+        * @param texture The texture to be extracted.
+        * @param fileName The suggested file name for the PNG file.
+        */
         public void ExtractTexture(Texture2D texture, string fileName)
         {
             // Convert the texture to a supported format if necessary
@@ -34,6 +48,15 @@ namespace WindowsApplication1
             }
         }
 
+        /**
+        * @brief Extracts model data and saves it as an OBJ file along with an associated MTL file and texture.
+        *
+        * Prompts the user to specify the file path for saving the OBJ and MTL files. Additionally, extracts and saves the texture used in the model.
+        *
+        * @param model The model from which data is extracted.
+        * @param meshIndex The index of the mesh within the model to be extracted.
+        * @param fileName The suggested file name for the OBJ file.
+        */
         public void ExtractModelData(Model model, int meshIndex, string fileName)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -107,6 +130,16 @@ namespace WindowsApplication1
                 SaveTexture(model, meshIndex, textureFileName);
             }
         }
+
+        /**
+        * @brief Saves the texture used in the model to a PNG file.
+        *
+        * Extracts and saves the texture associated with the specified mesh in the model.
+        *
+        * @param model The model containing the texture.
+        * @param meshIndex The index of the mesh within the model whose texture is to be saved.
+        * @param textureFileName The file name for the saved PNG texture.
+        */
         private void SaveTexture(Model model, int meshIndex, string textureFileName)
         {
             ModelMesh mesh = model.Meshes[meshIndex];
@@ -140,6 +173,15 @@ namespace WindowsApplication1
                 }
             }
         }
+
+        /**
+        * @brief Extracts a font atlas and saves it as a PNG file.
+        *
+        * Prompts the user to specify the file path for saving the PNG file of the font atlas.
+        *
+        * @param font The SpriteFont object whose texture is to be saved.
+        * @param fileName The suggested file name for the PNG file.
+        */
         public void ExtractFontAtlas(SpriteFont font, string fileName)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();

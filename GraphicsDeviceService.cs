@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Xnb.Exporter
 {
@@ -19,6 +15,13 @@ namespace Xnb.Exporter
         public event EventHandler<EventArgs> DeviceReset;
         public event EventHandler<EventArgs> DeviceResetting;
 
+        /**
+        * @brief Initializes a new instance of the `GraphicsDeviceService` class.
+        *
+        * @param windowHandle The handle of the window associated with the `GraphicsDevice`.
+        * @param width The width of the back buffer.
+        * @param height The height of the back buffer.
+        */
         public GraphicsDeviceService(IntPtr windowHandle, int width, int height)
         {
             var parameters = new PresentationParameters
@@ -35,6 +38,17 @@ namespace Xnb.Exporter
             GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.Reach, parameters);
         }
 
+        /**
+        * @brief Adds a reference to the singleton instance of the `GraphicsDeviceService`.
+        *
+        * If the singleton instance does not exist, it is created with the specified window handle,
+        * width, and height. The reference count is incremented.
+        *
+        * @param windowHandle The handle of the window associated with the `GraphicsDevice`.
+        * @param width The width of the back buffer.
+        * @param height The height of the back buffer.
+        * @return The singleton instance of the `GraphicsDeviceService`.
+        */
         public static GraphicsDeviceService AddRef(IntPtr windowHandle, int width, int height)
         {
             if (referenceCount == 0)
@@ -47,6 +61,14 @@ namespace Xnb.Exporter
             return singletonInstance;
         }
 
+        /**
+        * @brief Releases a reference to the singleton instance of the `GraphicsDeviceService`.
+        *
+        * The reference count is decremented, and if it reaches zero, the `GraphicsDevice` is disposed
+        * if disposing is true. The `GraphicsDevice` property is set to null.
+        *
+        * @param disposing Indicates whether to dispose the `GraphicsDevice`.
+        */
         public void Release(bool disposing)
         {
             referenceCount--;

@@ -8,7 +8,7 @@ namespace Xnb.Exporter
 {
     public class Exporter
     {
-        
+
         public delegate void Completed();
         public event Completed OnCompleted;
 
@@ -28,6 +28,13 @@ namespace Xnb.Exporter
         public string CurrentModelName { get; set; }
         public string ContentRootDirectory { get; private set; }
 
+        /**
+        * @brief Constructor initializes the Exporter with given files, PictureBox, and output path.
+        *
+        * @param files The array of file paths to be exported.
+        * @param pictureBox The PictureBox control to display images.
+        * @param outPath The output path for exporting files. Defaults to an empty string.
+        */
         public Exporter(string[] files, PictureBox pictureBox, string outPath = "")
         {
             this.files = files;
@@ -37,6 +44,11 @@ namespace Xnb.Exporter
         }
 
 
+        /**
+        * @brief Sets the content root directory for the ContentManager.
+        *
+        * @param directory The directory path to set as the content root.
+        */
         public void SetContentRootDirectory(string directory)
         {
             try
@@ -44,7 +56,6 @@ namespace Xnb.Exporter
                 ContentRootDirectory = directory;
                 contentManager.RootDirectory = directory;
                 Debug.LogMessage($"Content root directory set to: {directory}");
-
             }
             catch (Exception ex)
             {
@@ -53,6 +64,9 @@ namespace Xnb.Exporter
             }
         }
 
+        /**
+        * @brief Initializes the ContentManager and GraphicsDevice.
+        */
         public void InitializeContentManager()
         {
             var services = new GameServiceContainer();
@@ -71,6 +85,11 @@ namespace Xnb.Exporter
             contentManager = new ContentManager(services, contentRootDirectory);
         }
 
+        /**
+        * @brief Loads the XNB files and returns a list of XnbItems.
+        *
+        * @return A list of XnbItems representing the loaded files.
+        */
         public List<XnbItem> Load()
         {
             List<XnbItem> items = new List<XnbItem>();
@@ -125,6 +144,12 @@ namespace Xnb.Exporter
             return items;
         }
 
+        /**
+        * @brief Displays a skinned model in the PictureBox.
+        *
+        * @param model The Model object to be displayed.
+        * @param modelName The name of the model.
+        */
         public void DisplaySkinnedModel(Model model, string modelName)
         {
             // Assuming you have a valid GraphicsDevice instance available
@@ -161,6 +186,12 @@ namespace Xnb.Exporter
             }
         }
 
+        /**
+        * @brief Displays the font atlas in the PictureBox.
+        *
+        * @param font The SpriteFont object containing the font atlas.
+        * @param fileName The file name of the font.
+        */
         public void DisplayFontAtlas(SpriteFont font, string fileName)
         {
             //Displaying the texture of the font
@@ -173,6 +204,11 @@ namespace Xnb.Exporter
 
         }
 
+        /**
+        * @brief Displays an image in the PictureBox.
+        *
+        * @param texture The Texture2D object to be displayed.
+        */
         public void DisplayImage(Texture2D texture)
         {
             try
@@ -205,6 +241,11 @@ namespace Xnb.Exporter
             }
         }
 
+        /**
+        * @brief Applies an animation to the current model.
+        *
+        * @param animation The AnimationClip object containing the animation data.
+        */
         public void ApplyAnimation(AnimationClip animation)
         {
             // Check if there is a current model to apply the animation to
@@ -235,6 +276,12 @@ namespace Xnb.Exporter
             CurrentFrame = (CurrentFrame + 1) % animation.FrameCount;
         }
 
+        /**
+        * @brief Converts a texture to a supported format if needed.
+        *
+        * @param texture The Texture2D object to be converted.
+        * @return The converted Texture2D object.
+        */
         public Texture2D ConvertToSupportedFormat(Texture2D texture)
         {
             // Check if the format is DXT and decompress if needed
@@ -249,11 +296,23 @@ namespace Xnb.Exporter
             return texture;
         }
 
+        /**
+        * @brief Checks if a texture format is a DXT format.
+        *
+        * @param format The SurfaceFormat to be checked.
+        * @return True if the format is DXT, false otherwise.
+        */
         public bool IsDXTFormat(SurfaceFormat format)
         {
             return format == SurfaceFormat.Dxt1 || format == SurfaceFormat.Dxt3 || format == SurfaceFormat.Dxt5;
         }
 
+        /**
+        * @brief Decompresses a DXT texture to an array of colors.
+        *
+        * @param texture The Texture2D object to be decompressed.
+        * @return An array of decompressed colors.
+        */
         public Microsoft.Xna.Framework.Color[] DecompressDXT(Texture2D texture)
         {
             int width = texture.Width;
@@ -290,6 +349,14 @@ namespace Xnb.Exporter
             }
         }
 
+        /**
+        * @brief Converts a byte array to an array of colors.
+        *
+        * @param byteArray The byte array to be converted.
+        * @param width The width of the texture.
+        * @param height The height of the texture.
+        * @return An array of colors.
+        */
         private Microsoft.Xna.Framework.Color[] ConvertToColorArray(byte[] data, int width, int height)
         {
             var colorData = new Microsoft.Xna.Framework.Color[width * height];
@@ -300,6 +367,14 @@ namespace Xnb.Exporter
             return colorData;
         }
 
+        /**
+        * @brief Generates a preview of a model as a Bitmap.
+        *
+        * @param model The model to generate the preview for.
+        * @param graphicsDevice The graphics device used for rendering.
+        * @param meshIndex The index of the mesh to render.
+        * @return The generated Bitmap preview of the model.
+        */
         public Bitmap GenerateModelPreview(Model model, GraphicsDevice graphicsDevice, int meshIndex)
         {
             if (graphicsDevice == null)
@@ -380,6 +455,17 @@ namespace Xnb.Exporter
 
     public static class Extensions
     {
+        /**
+        * @brief Reads a specified number of bytes from a FileStream starting at a given index.
+        *
+        * This extension method allows for reading a sequence of bytes from a FileStream, beginning at the specified index.
+        * If the length is not provided or is set to 0, the method will read all bytes from the specified index to the end of the stream.
+        *
+        * @param stream The FileStream from which bytes will be read.
+        * @param index The starting position in the stream from which to begin reading bytes.
+        * @param length The number of bytes to read. If set to 0, reads from the index to the end of the stream.
+        * @return A byte array containing the bytes read from the stream.
+        */
         public static byte[] ReadBytes(this FileStream stream, int index, int length = 0)
         {
             stream.Seek(index, SeekOrigin.Begin);

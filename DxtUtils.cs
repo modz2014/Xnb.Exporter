@@ -3,12 +3,28 @@
 
     internal static class DxtUtil
     {
+        /**
+        * @brief Decompresses DXT1 image data from a byte array and returns an array of RGBA values.
+        *
+        * @param imageData The byte array containing the DXT1 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt1(byte[] imageData, int width, int height)
         {
             using MemoryStream imageStream = new MemoryStream(imageData);
             return DecompressDxt1(imageStream, width, height);
         }
 
+        /**
+        * @brief Decompresses DXT1 image data from a stream and returns an array of RGBA values.
+        *
+        * @param imageStream The stream containing the DXT1 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt1(Stream imageStream, int width, int height)
         {
             byte[] array = new byte[width * height * 4];
@@ -26,6 +42,17 @@
             return array;
         }
 
+        /**
+        * @brief Decompresses a single DXT1 block from the image stream and updates the image data array.
+        *
+        * @param imageReader The binary reader for reading DXT1 compressed data.
+        * @param x The x-coordinate of the block.
+        * @param y The y-coordinate of the block.
+        * @param blockCountX The number of blocks along the x-axis.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @param imageData The array to be updated with the decompressed RGBA values.
+        */
         private static void DecompressDxt1Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             ushort num = imageReader.ReadUInt16();
@@ -110,12 +137,28 @@
             }
         }
 
+        /**
+        * @brief Decompresses DXT3 image data from a byte array and returns an array of RGBA values.
+        *
+        * @param imageData The byte array containing the DXT3 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt3(byte[] imageData, int width, int height)
         {
             using MemoryStream imageStream = new MemoryStream(imageData);
             return DecompressDxt3(imageStream, width, height);
         }
 
+        /**
+        * @brief Decompresses DXT3 image data from a stream and returns an array of RGBA values.
+        *
+        * @param imageStream The stream containing the DXT3 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt3(Stream imageStream, int width, int height)
         {
             byte[] array = new byte[width * height * 4];
@@ -133,6 +176,17 @@
             return array;
         }
 
+        /**
+        * @brief Decompresses a single DXT3 block from the image stream and updates the image data array.
+        *
+        * @param imageReader The binary reader for reading DXT3 compressed data.
+        * @param x The x-coordinate of the block.
+        * @param y The y-coordinate of the block.
+        * @param blockCountX The number of blocks along the x-axis.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @param imageData The array to be updated with the decompressed RGBA values.
+        */
         private static void DecompressDxt3Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             byte b = imageReader.ReadByte();
@@ -249,12 +303,28 @@
             }
         }
 
+        /**
+        * @brief Decompresses DXT5 image data from a byte array and returns an array of RGBA values.
+        *
+        * @param imageData The byte array containing the DXT5 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt5(byte[] imageData, int width, int height)
         {
             using MemoryStream imageStream = new MemoryStream(imageData);
             return DecompressDxt5(imageStream, width, height);
         }
 
+        /**
+        * @brief Decompresses DXT5 image data from a stream and returns an array of RGBA values.
+        *
+        * @param imageStream The stream containing the DXT5 compressed image data.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @return An array of RGBA values representing the decompressed image.
+        */
         internal static byte[] DecompressDxt5(Stream imageStream, int width, int height)
         {
             byte[] array = new byte[width * height * 4];
@@ -272,6 +342,17 @@
             return array;
         }
 
+        /**
+        * @brief Decompresses a single DXT5 block from the image stream and updates the image data array.
+        *
+        * @param imageReader The binary reader for reading DXT5 compressed data.
+        * @param x The x-coordinate of the block.
+        * @param y The y-coordinate of the block.
+        * @param blockCountX The number of blocks along the x-axis.
+        * @param width The width of the image.
+        * @param height The height of the image.
+        * @param imageData The array to be updated with the decompressed RGBA values.
+        */
         private static void DecompressDxt5Block(BinaryReader imageReader, int x, int y, int blockCountX, int width, int height, byte[] imageData)
         {
             byte b = imageReader.ReadByte();
@@ -346,6 +427,14 @@
             }
         }
 
+        /**
+        * @brief Converts a 16-bit RGB565 color to a 24-bit RGB888 color.
+        *
+        * @param color The 16-bit RGB565 color value.
+        * @param r The red component of the resulting RGB888 color.
+        * @param g The green component of the resulting RGB888 color.
+        * @param b The blue component of the resulting RGB888 color.
+        */
         private static void ConvertRgb565ToRgb888(ushort color, out byte r, out byte g, out byte b)
         {
             int num = (color >> 11) * 255 + 16;
